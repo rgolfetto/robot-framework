@@ -33,10 +33,10 @@ Test Open Browser and Input Information
        #Select Color from List
        Select Color     Yellow
 
-       #Get WebTable value by Position
+       #Get WebTable value by Position and validate if it's empty or not and returns the cell value
        Validate If Table Cell Have Any Value In Selected Row and Column    7    1 
 
-       #Get WebTable Cell by Value
+       #Get WebTable Cell by Value and validate the position the value was found
        Validate If Table Cell Have The Especified Value   Javascript
 
        #Select page from pagination table by adding the page number
