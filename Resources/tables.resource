@@ -43,30 +43,30 @@ Table Header should contain
     Table Header Should Contain    ${tableLocator}    ${expectedValue}
 
 Get Table Cell By Value
-    [Arguments]    ${tableLocator}    ${expectedValue}
+    [Arguments]    ${tableLocator}    ${expectedValue}    ${expectedCol}
     ${rowCount}=    Get Element Count    ${tableLocator} tr
-    ${colCount}=    Get Element Count    ${tableLocator} th
     ${result}=    Create List
 
     FOR    ${row}    IN RANGE    1    ${rowCount+1}
-        ${currentRow}=    Set Variable    ${row}
-        FOR    ${col}    IN RANGE    1    ${colCount+1}
-            ${currentColInLoop}=    Set Variable    ${col}
-            ${cellLocator}=    Set Variable    css:tr:nth-child(${row}) td:nth-child(${col})
-            ${cellValue}=    Get Text    ${cellLocator}
-            IF    '${cellValue}' == '${expectedValue}'
-                Append To List    ${result}    [${cellValue}, ${currentRow}, ${currentColInLoop}]
-            END
+        ${cellLocator}=    Set Variable    css:tr:nth-child(${row}) td:nth-child(${expectedCol})
+        ${cellValue}=    Get Text    ${cellLocator}
+        IF    '${cellValue}' == '${expectedValue}'
+            Append To List    ${result}    [${cellValue}, ${row}, ${expectedCol}]
         END
     END
     [Return]    ${result}
 
-Validate If Table Cell Have The Expected Value
-    [Arguments]    ${value}
-    ${result}=    Get Table Cell By Value    ${WEBTABLELOCATOR}    ${value}
-    FOR    ${list}    IN    @{result}
-        Log Many    Value exists in: ${list[0]} at row ${list[1]}, column ${list[2]}
-    END
+
+
+Validate Value in Table Cell
+    [Arguments]    ${tableLocator}    ${expectedValue}    ${expectedCol}    ${expectedRow}
+    ${cellLocator}=    Set Variable    css:tr:nth-child(${expectedRow}) td:nth-child(${expectedCol})
+    ${actualValue}=    Get Text    ${cellLocator}
+
+    Run Keyword If    '${actualValue}' == '${expectedValue}'
+    ...    Log    Value ${expectedValue} found in row ${expectedRow}, column ${expectedCol}
+    ...    ELSE
+    ...    Fail    Value ${expectedValue} not found in row ${expectedRow}, column ${expectedCol}
 
 Get Pagination Table Page Elements
     [Arguments]    ${locator}
@@ -89,10 +89,51 @@ Toggle Checkbox Based on Value in Table
     ${checkboxLocator}=    Set Variable    //*[@id="${tableId}"]/tbody/tr[td[contains(text(),"${valueToFind}")]]/td[${tdPosition}]/input
     ${checkboxExists}=    Run Keyword And Return Status    Page Should Contain Element    ${checkboxLocator}
     Run Keyword If    '${checkboxExists}' == 'True'  Select Checkbox    ${checkboxLocator}
+    ...    ELSE    Fail    Could not locate the checkbox
     Log    Checked checkbox for: ${valueToFind}
 
 Validate Table Cell Value
-    [Arguments]    ${tableLocator}    ${row}    ${col}
-    ${cell}=    Get Text    //*[@name="${tableLocator}"]/tbody/tr[${row}]/td[${col}]
+    [Arguments]    ${tableLocator}    ${row}    ${column}    ${expectedValue}
+    ${cell}=    Get Text    xpath=//table[@'${tableLocator}']/tbody/tr[${row}]/td[${column}]
     Run Keyword If    '${cell}' == ''    Fail    Table cell is empty
-    [Return]    ${cell}
+    Run Keyword If    '${cell}' != '${expectedValue}'    Fail    The values are different: ${cell} != ${expectedValue}
+    Log    Validation passed for cell: ${cell} == ${expectedValue}
+
+Select Page by Number
+    [Arguments]    ${tableLocator}    ${pageNumber}
+    ${pageLocator}=    Set Variable    xpath=//*[@id="${tableLocator}"]/li[${pageNumber}]/a
+    ${pageExists}=    Run Keyword And Return Status    Element Should Be Visible    ${pageLocator}
+    
+    Run Keyword If    ${pageExists}    Select Page    ${pageLocator}    ${pageNumber}
+    ...    ELSE
+    ...    Fail    Page ${pageNumber} not found in the pagination table
+
+Select Page
+    [Arguments]    ${pageLocator}    ${pageNumber}
+    Click Element    ${pageLocator}
+    Log    Page ${pageNumber} selected
+
+Get Cell Value by Header and Value
+    [Arguments]    ${header}    ${value}    ${tableLocator}
+    ${colIndex}=    Get Column Index by Header    ${header}
+    ${rowsWithoutHeader}=    Get WebElements    ${tableLocator}//tr[th] #Change the path when necessary
+    ${rowCount}=    Get Length    ${rowsWithoutHeader}
+    ${rowIndex}=    Set Variable    -1
+    FOR    ${index}    IN RANGE    ${rowCount}
+        ${cellValue}=    Get Text    xpath=${tableLocator}//tr[${index + 1}]//th[${colIndex + 1}] #Change the path when necessary
+        Run Keyword If    '${cellValue}' == '${value}'    Set Variable    ${rowIndex}    ${index + 1}
+    END
+    [Return]    ${rowIndex}
+
+Get Column Index by Header
+    [Arguments]    ${header}
+    ${headerXpath}=    Get Xpath For Table Header    ${header}
+    ${colIndex}=    Get Element Count    ${headerXpath}//preceding-sibling::th
+    [Return]    ${colIndex + 1}    # Adding 1 as the index starts from 1 in Robot Framework
+
+Get Xpath For Table Header
+    [Arguments]    ${header}
+    [Return]    xpath=${WEBTABLELOCATOR}//th[contains(.,'${header}')] | //th//a[contains(.,'${header}')]
+
+
+

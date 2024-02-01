@@ -8,7 +8,7 @@ Resource          ../Resources/TestData.resource
 
 *** Test Cases ***
 Test Open Browser and Input Information
-...    [Documentation]  Basic test automation 
+...    [Documentation]  Basic test automation
        [Tags]  AB
        Open Browser, Maximize and navigate to URL
 
@@ -33,21 +33,26 @@ Test Open Browser and Input Information
        #Select Color from List
        Select Color     Yellow
 
-       #Get WebTable value by Position and validate if it's empty or not and returns the cell value
-       Validate If Table Cell Have Any Value In Selected Row and Column    7    1 
+       #Validate if the expected value exists in the given row and column, fails if not
+       Validate Table Value by Position    Selenium    2    3    
 
-       #Get WebTable Cell by Value and validate the position the value was found
-       Validate If Table Cell Have The Especified Value   Javascript
+       #Validate
+       Validate Table Value by Header and Expected Value    Subject    Javascript    
 
-       #Select page from pagination table by adding the page number
+       #Select page by page number
+       Select Page by Page Number    2
+
+       #Select page from pagination table by adding the page number and use the index
        Select Page from Table Pages    3
-
-       #Mark checkbox based on line value
-       Mark checkbox based on value in Table    Product 14
+       
+       #Mark checkbox based on line value and row
+       Mark checkbox based on value in Table    Product 14    4
 
        #Click the submit button
        Click Submit
-       
+        
+       #Close Browser
+       Close All Browsers
 
         
 
