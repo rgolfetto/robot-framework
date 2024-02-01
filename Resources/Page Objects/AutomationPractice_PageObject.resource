@@ -17,25 +17,23 @@ ${SUBMITBUTTON}                class=buttons_reverse .submit_button
 ${GENDEROPTIONS}               gender
 ${CHECKBOXSUNDAY}              id=sunday
 ${CHECKBOXTHURSDAY}            id=thursday
-${WEBTABLELOCATOR}             class=widget-content > table
+${WEBTABLELOCATOR}             //*[@id="HTML1"]/div[1]/table
 ${ROWCOUNT}                    xpath://table[@name='BookTable']/tbody/tr
 ${COLCOUNT}                    xpath://table[@name='BookTable']/tbody/tr[1]/th  
 ${GETCOUNTRYVALUES}            id=country
-
 ${DAYSLOCATORINPUT}            class=post-body.entry-content > .form-group:nth-of-type(4) label ~ div input
 ${DAYSLOCATOR}                 class=post-body.entry-content > .form-group:nth-of-type(4) label ~ div
 ${BOOKTABLENAME}               BookTable
 ${COLORSLIST}                  id=colors
 ${ABTESTINGLINK}               class=large-12 > ul > li:nth-child(1) > a
-${PAGINATIONTABLEPAGE}         class=pagination > li
+${PAGINATIONTABLEPAGEINTEGER}         class=pagination > li
+${PAGINATIONTABLEBYNUMBER}     pagination
 ${PAGINATIONTABLE}             productTable
 ${FRAMELOCATOR}                class=widget-content iframe#frame-one796456169
-${TDPOSITION}                  4
-${VALUETOFIND}                 Product 14
 
 *** Keywords ***
 Open Browser, Maximize and navigate to URL
-       Open Browser    https://testautomationpractice.blogspot.com    headlesschrome
+       Open Browser    https://testautomationpractice.blogspot.com    headlessfirefox
        Maximize Browser Window
 
 Navigate to another page
@@ -48,19 +46,19 @@ Click AB Testing Link
 
 Enter name  
     [Arguments]    ${name}
-    Input Text   ${NAMEID}   ${name}
+    Enter Information   ${NAMEID}   ${name}
 
 Enter email
     [Arguments]    ${email}
-    Input Text   ${EMAILID}  ${email}
+    Enter Information   ${EMAILID}  ${email}
 
 Enter phone number
     [Arguments]    ${phone}
-    Input Text   ${PHONEID}  ${phone}
+    Enter Information   ${PHONEID}  ${phone}
 
 Enter address
     [Arguments]    ${address}
-    Input Text   ${ADRESSID}  ${address}
+    Enter Information   ${ADRESSID}  ${address}
 
 Click Submit
     Select Frame      ${FRAMELOCATOR}
@@ -76,16 +74,15 @@ Validate text on page
     Wait Until Page Contains    ${text}
 
 ###  Tables  ### 
-Validate If Table Cell Have Any Value In Selected Row and Column
-    [Arguments]    ${row}    ${col}
-    ${actualValue}=    Get cell by position    ${WEBTABLELOCATOR}    ${row}    ${col}
-    Validate Table Cell Value    ${BOOKTABLENAME}    ${row}    ${col}            
-    Log    Actual value in the cell: ${actualValue}
+Validate Table Value by Position 
+    [Arguments]    ${value}    ${expectedRow}    ${expectedCol}
+    ${actualValue}=    Get cell by position    ${WEBTABLELOCATOR}    ${expectedRow}    ${expectedCol}
+    Should Be Equal As Strings    ${actualValue}    ${value}
 
-Validate If Table Cell Have The Especified Value
-    [Arguments]    ${value}
-    Get Table Cell By Value    ${WEBTABLELOCATOR}    ${value}
-    Validate If Table Cell Have The Expected Value    ${value}    
+Validate Table Value by Header and Expected Value
+    [Arguments]    ${header}    ${expectedValue}
+    ${colIndex}=    Get Column Index by Header    ${header}
+    Get Cell Value by Header and Value    ${header}    ${expectedValue}    ${WEBTABLELOCATOR}
 
 ##  List  ##
 Select Day from Days List By Position
@@ -108,8 +105,13 @@ Select Country
 
 Select Page from Table Pages
     [Arguments]    ${pageNumber}
-    Change Page In Pagination Table    ${PAGINATIONTABLEPAGE}    ${pageNumber}
+    Change Page In Pagination Table    ${PAGINATIONTABLEPAGEINTEGER}    ${pageNumber}
+
+Select Page by Page Number
+    [Arguments]    ${pageNumber}
+    Select Page by Number    ${PAGINATIONTABLEBYNUMBER}    ${pageNumber}   
+    
 
 Mark checkbox based on value in Table
-    [Arguments]    ${value}
-    Toggle Checkbox Based on Value in Table    ${PAGINATIONTABLE}   ${value}    ${TDPOSITION}
+    [Arguments]    ${value}    ${col}
+    Toggle Checkbox Based on Value in Table    ${PAGINATIONTABLE}   ${value}    ${col}
