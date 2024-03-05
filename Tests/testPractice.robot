@@ -36,7 +36,7 @@ Test Open Browser and Input Information
        #Validate if the expected value exists in the given row and column, fails if not
        Validate Table Value by Position    Selenium    2    3    
 
-       #Validate
+       #Validate table value by header and expected value
        Validate Table Value by Header and Expected Value    Subject    Javascript    
 
        #Select page by page number
